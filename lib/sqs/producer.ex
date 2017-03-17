@@ -21,19 +21,20 @@ defmodule SQS.Producer do
   def handle_demand(demand, state) when demand > 0 do
     IO.puts "SQS.Producer handling demand of #{demand}"
 
-    # Make a call to the server for the required number of events,
-    # accounting for previously unsatisfied demand
     new_demand = demand + state
 
     {count, events} = take(new_demand)
 
-    # Events will always be returned from this server,
-    # but if `events` was empty, state will be updated to the new demand level
     {:noreply, events, new_demand - count}
   end
 
+  def handle_info({:events, {count, events}}, state) do
+    IO.puts "SQS.Producer got notified about #{count} new events"
+
+    {:noreply, events, state - count}
+  end
+
   defp take(demand) do
-    # Return a list no longer than the demand value
     IO.puts "Asking for #{demand} events"
 
     {count, events} = SQS.Server.pull(demand)

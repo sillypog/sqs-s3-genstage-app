@@ -38,5 +38,5 @@ Consumed: ho, ho, ho, ho, ho, ho, ho, ho, ho, ho
 ...
 ```
 
-
-
+## sqs-step-2-asynchronous-server
+The server is still returning generated strings, but it now does this within a loop running as a supervised task. The introduction of this asynchronous behaviour is the first step towards continously polling for SQS messages.

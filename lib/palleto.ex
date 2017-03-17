@@ -1,4 +1,9 @@
 defmodule Palleto do
+  @moduledoc """
+  All changes here are within the Server module,
+  as it now simulates fetching events asynchronously.
+  """
+
   use Application
 
   def start(_type, _args) do
