@@ -1,15 +1,10 @@
 defmodule Palleto do
   @moduledoc """
-  Messages are now being deleted once they are processed.
-  At this point, the SQS aspects of the pipeline are
-  working as planned.
-
-  This was done by adding a release function to the server,
-  which extracts the newly added message_id and receipt_handle
-  fileds from each event sent through the stages. In this
-  way, the consumer doesn't need to know anything about the
-  implementation of message deleting, it just informs the server
-  when a message should be deleted.
+  A producer/consumer step has been added which downloads
+  the file from S3 based on the location extracted from
+  the message in the server. The consumer now counts the
+  lines in that file and writes the count for each file
+  to disk.
   """
 
   use Application
@@ -20,6 +15,7 @@ defmodule Palleto do
     children = [
       worker(SQS.Server, []),
       worker(SQS.Producer, []),
+      worker(SQS.ProducerConsumer, []),
       worker(SQS.Consumer, [])
     ]
 

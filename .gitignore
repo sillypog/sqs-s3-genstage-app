@@ -22,3 +22,6 @@ erl_crash.dump
 # Files with secret keys for development
 docker/development/secret/*
 !docker/development/secret/*.env.example
+
+# Consumer output
+output/*.txt

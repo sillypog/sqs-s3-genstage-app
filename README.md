@@ -141,11 +141,10 @@ SQS.Producer handling demand of 10
 Asking for 10 events
 There are currently 0 servers looping
 All servers terminated
-Interactive Elixir (1.4.2) - press Ctrl+C to exit (type h() ENTER for help)
 Started new server loop with pid #PID<0.192.0>
 Server #PID<0.192.0> looping: Run 0. Looking for 10 events
 Received 0 events
-iex(1)> Server #PID<0.192.0> looping: Run 1. Looking for 10 events
+Server #PID<0.192.0> looping: Run 1. Looking for 10 events
 Server #PID<0.192.0> looping: Run 2. Looking for 10 events
 Server #PID<0.192.0> looping: Run 3. Looking for 10 events
 Server #PID<0.192.0> looping: Run 4. Looking for 10 events
@@ -180,5 +179,63 @@ Server #PID<0.197.0> looping: Run 3. Looking for 8 events
 Server #PID<0.197.0> looping: Run 4. Looking for 8 events
 Server #PID<0.197.0> looping: Run 5. Looking for 8 events
 Server #PID<0.197.0> looping: Run 6. Looking for 8 events
+...
+```
+
+## sqs-step-8-download-and-process-file
+A producer/consumer stage has been added to the pipeline. This downloads and unzips the S3 file referenced in the event it receives from the producer. The consumer then analyses the contents of the file passed to it from the producer/consumer, writing the number of lines in that file to disk.
+
+```
+Attempting to start SQS.Server
+Initializing SQS.Server supervision tree
+Initalised SQS.Producer
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.192.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.192.0>
+Received 0 events
+Server #PID<0.192.0> looping: Run 1. Looking for 1 events
+Server #PID<0.192.0> looping: Run 2. Looking for 1 events
+Casting events to producer
+SQS.Producer got notified about 1 new events
+ProducerConsumer received 1 events
+#ProducerConsumer downloaded packrat/data/20160721.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.200.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.200.0>
+Received 0 events
+Consumer processed packrat/data/20160721.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+ProducerConsumer received 1 events
+#ProducerConsumer downloaded packrat/data/20160720.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.202.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.202.0>
+Received 0 events
+Consumer processed packrat/data/20160720.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+ProducerConsumer received 1 events
+#ProducerConsumer downloaded packrat/data/20160722.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.205.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.205.0>
+Received 0 events
+Consumer processed packrat/data/20160722.gz
+Server #PID<0.205.0> looping: Run 1. Looking for 1 events
+Server #PID<0.205.0> looping: Run 2. Looking for 1 events
+Server #PID<0.205.0> looping: Run 3. Looking for 1 events
 ...
 ```

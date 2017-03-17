@@ -1,14 +1,14 @@
 defmodule SQS.Consumer do
   @moduledoc """
-  The consumer is now informing the server that messages have
-  been processed. The consumer doesn't need to know how this
-  works, it just passes the original message back to the server.
-  The message contains all the information necessary to remove
-  the SQS message from the queue.
+  The consumer is now subscribing to the producer/consumer,
+  with a demand of 1 because we only want to process one
+  file at a time. The consumer now receives the contents
+  of the S3 file and counts the number of lines in the file,
+  writing the count to the output/ folder.
 
-  The display_events function has changed because the event is
-  now a map in order to contain the extra information needed
-  to delete the SQS message.
+  The artificial delay in the consumer has been removed,
+  as latency is introduced to the pipeline by the file
+  download in the producer/consumer.
   """
 
   use GenStage
@@ -26,15 +26,16 @@ defmodule SQS.Consumer do
   ##########
 
   def init(:ok) do
-    {:consumer, :ok, subscribe_to: [{SQS.Producer, min_demand: 0, max_demand: 10}]}
+    {:consumer, :ok, subscribe_to: [{SQS.ProducerConsumer, min_demand: 0, max_demand: 1}]}
   end
 
-  def handle_events(events, _from, state) do
-    :timer.sleep(1000)
+  def handle_events([%{key: key, file: file}] = events, _from, state) do
+    file
+    |> process_file
+    |> write_output(String.split(key, "."))
 
-    display_events(events)
+    IO.puts "Consumer processed #{key}"
 
-    # Remove the event from the queue
     SQS.Server.release(events)
 
     {:noreply, [], state}
@@ -43,10 +44,22 @@ defmodule SQS.Consumer do
   ########
   # Private functions
   ########
-  defp display_events(events) do
-    event_string = events
-    |> Enum.map(fn(%{bucket: bucket, key: key}) -> "#{bucket}/#{key}" end)
-    |> Enum.join(", ")
-    IO.puts "Consumed by #{inspect(self())}: #{event_string}"
+  defp process_file(file) do
+    file
+    |> String.split("\n")
+    |> Enum.filter(fn(line) -> line != "" end)
+    |> Enum.count
+  end
+
+  defp write_output(event_count, [filepath, _]) do
+    filename = filepath
+    |> String.split("/")
+    |> List.last
+
+    # Write the count to a file in append mode,
+    # we can use this to ensure each file was only processed once
+    File.open("output/#{filename}.txt", [:append], fn(file) ->
+      IO.write(file, "#{event_count}\n")
+    end)
   end
 end
