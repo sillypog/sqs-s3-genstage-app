@@ -1,18 +1,16 @@
 defmodule Palleto do
-  @moduledoc """
-  Documentation for Palleto.
-  """
+  use Application
 
-  @doc """
-  Hello world.
+  def start(_type, _args) do
+    import Supervisor.Spec
 
-  ## Examples
+    children = [
+      worker(SQS.Server, []),
+      worker(SQS.Producer, []),
+      worker(SQS.Consumer, [])
+    ]
 
-      iex> Palleto.hello
-      :world
-
-  """
-  def hello do
-    :world
+    opts = [strategy: :one_for_one, name: ApplicationSupervisor]
+    Supervisor.start_link(children, opts)
   end
 end
