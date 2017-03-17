@@ -5,7 +5,7 @@ defmodule SQS.Consumer do
   # Client API
   ##########
   def start_link do
-    GenStage.start_link(__MODULE__, :ok, name: __MODULE__)
+    GenStage.start_link(__MODULE__, :ok)
   end
 
 
@@ -21,7 +21,7 @@ defmodule SQS.Consumer do
     :timer.sleep(1000)
 
     event_string = Enum.join(events, ", ")
-    IO.puts "Consumed: #{event_string}"
+    IO.puts "Consumed by #{inspect(self())}: #{event_string}"
 
     {:noreply, [], state}
   end

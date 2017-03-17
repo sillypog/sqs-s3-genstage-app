@@ -1,16 +1,4 @@
 defmodule SQS.Server do
-  @moduledoc """
-  The server doesn't return any messages the first 5 times it runs,
-  then it begins returning a small number of a messages at a time.
-
-  This is designed to simulate real interactions with SQS, where
-  messages may not be available immediately and where messages
-  are not all retrieved in a single call.
-
-  There should only be one server loop running at a time. To be
-  extra cautious, a list of supervised loops is retrieved when
-  new demand is received and all of these are killed.
-  """
   use Supervisor
 
   ##########
@@ -49,7 +37,7 @@ defmodule SQS.Server do
   # Private functions
   ##########
   defp loop(count, runs) do
-    IO.puts "Server looping: Run #{runs}. Looking for #{count} events"
+    IO.puts "Server #{inspect(self())} looping: Run #{runs}. Looking for #{count} events"
 
     # Simulate the scenario where we don't have enough supply immediately
     events = if runs < 5  do

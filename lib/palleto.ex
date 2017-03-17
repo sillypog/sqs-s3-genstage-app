@@ -1,8 +1,8 @@
 defmodule Palleto do
   @moduledoc """
-  This is a more accurate simulation of working with SQS.
-  Messages are not available immediately and demand is not
-  satisfied when the first batch of events is found.
+  There are now multiple consumers, all demanding 10 events.
+  The producer and server have not changed since the last step,
+  except to include their pid in some log messages.
   """
 
   use Application
@@ -13,7 +13,9 @@ defmodule Palleto do
     children = [
       worker(SQS.Server, []),
       worker(SQS.Producer, []),
-      worker(SQS.Consumer, [])
+      worker(SQS.Consumer, [], id: 1),
+      worker(SQS.Consumer, [], id: 2),
+      worker(SQS.Consumer, [], id: 3)
     ]
 
     opts = [strategy: :one_for_one, name: ApplicationSupervisor]

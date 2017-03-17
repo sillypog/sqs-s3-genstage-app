@@ -92,3 +92,31 @@ Server looping: Run 1. Looking for 10 events
 Server looping: Run 2. Looking for 10 events
 ...
 ```
+
+## sqs-step-5-multiple-consumers
+There are now 3 consumer stages, each demanding 10 events. When one of these consumers processes 10 events, it will send demand for 10 more events. The producer will add this to the existing unserved demand and request these events from the server. The loop will be cancelled and a new loop started. A subset of the output is included here to show this in action:
+```
+...
+Server #PID<0.165.0> looping: Run 17. Looking for 6 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed by #PID<0.157.0>: hey, hey
+SQS.Producer handling demand of 10
+Asking for 14 events
+There are currently 1 servers looping
+Terminating server with pid #PID<0.165.0>
+All servers terminated
+Server #PID<0.166.0> looping: Run 0. Looking for 14 events
+Started new server loop with pid #PID<0.166.0>
+Received 0 events
+Server #PID<0.166.0> looping: Run 1. Looking for 14 events
+Server #PID<0.166.0> looping: Run 2. Looking for 14 events
+Server #PID<0.166.0> looping: Run 3. Looking for 14 events
+Server #PID<0.166.0> looping: Run 4. Looking for 14 events
+Server #PID<0.166.0> looping: Run 5. Looking for 14 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed by #PID<0.157.0>: hey, hey
+Server #PID<0.166.0> looping: Run 6. Looking for 12 events
+...
+```
