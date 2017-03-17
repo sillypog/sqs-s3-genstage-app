@@ -1,7 +1,8 @@
 defmodule Palleto do
   @moduledoc """
-  All changes here are within the Server module,
-  as it now simulates fetching events asynchronously.
+  This has the same functionality as the previous step,
+  but now the producer provides an API to make it explicit
+  that the server should inform it when events are found.
   """
 
   use Application

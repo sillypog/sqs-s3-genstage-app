@@ -40,3 +40,38 @@ Consumed: ho, ho, ho, ho, ho, ho, ho, ho, ho, ho
 
 ## sqs-step-2-asynchronous-server
 The server is still returning generated strings, but it now does this within a loop running as a supervised task. The introduction of this asynchronous behaviour is the first step towards continously polling for SQS messages.
+
+## sqs-step-3-send-via-client-api
+This is very similar to the previous step, except the producer provides an `enqueue/1` function to make the data flow from the server more explicit than using `Kernal.send/2`.
+```
+Attempting to start SQS.Server
+Initializing SQS.Server supervision tree
+Initalised SQS.Producer
+SQS.Producer handling demand of 10
+Asking for 10 events
+There are currently 0 servers looping
+Server looping: Run 0. Looking for 10 events
+Casting events to producer
+Started new server loop with pid #PID<0.158.0>
+Received 0 events
+SQS.Producer got notified about 10 new events
+Consumed: hey, hey, hey, hey, hey, hey, hey, hey, hey, hey
+SQS.Producer handling demand of 10
+Asking for 10 events
+There are currently 0 servers looping
+Server looping: Run 0. Looking for 10 events
+Started new server loop with pid #PID<0.162.0>
+Casting events to producer
+Received 0 events
+SQS.Producer got notified about 10 new events
+Consumed: hey, hey, hey, hey, hey, hey, hey, hey, hey, hey
+SQS.Producer handling demand of 10
+Asking for 10 events
+There are currently 0 servers looping
+Server looping: Run 0. Looking for 10 events
+Started new server loop with pid #PID<0.163.0>
+Casting events to producer
+Received 0 events
+SQS.Producer got notified about 10 new events
+Consumed: hey, hey, hey, hey, hey, hey, hey, hey, hey, hey
+```
