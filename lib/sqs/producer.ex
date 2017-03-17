@@ -1,14 +1,4 @@
 defmodule SQS.Producer do
-  @moduledoc """
-  Added the enqueue function to allow the server to
-  inform the producer that requested events have been
-  found. This may be the full count sufficient to
-  satisfy demand, or fewer.
-
-  Handling demand in handle_cast in addition to handle_demand
-  makes the producer lifecycle more flexible, with very little
-  extra work.
-  """
   use GenStage
 
   ##########

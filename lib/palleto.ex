@@ -1,8 +1,19 @@
 defmodule Palleto do
   @moduledoc """
-  There are now multiple consumers, all demanding 10 events.
-  The producer and server have not changed since the last step,
-  except to include their pid in some log messages.
+  This is the first step that downloads data from SQS.
+  There are significant changes to the server to retrieve and
+  parse messages from the queue.
+
+  Although the server has changed significantly, the interaction
+  with the producer is unchanged and the producer has not been
+  modified at all.
+
+  The consumer has been modified to display the new message
+  format.
+
+  There is a major issue with the code at this point - although
+  messages are consumed, they are never removed from the queue.
+  Messages will be consumed more than once.
   """
 
   use Application
@@ -13,9 +24,7 @@ defmodule Palleto do
     children = [
       worker(SQS.Server, []),
       worker(SQS.Producer, []),
-      worker(SQS.Consumer, [], id: 1),
-      worker(SQS.Consumer, [], id: 2),
-      worker(SQS.Consumer, [], id: 3)
+      worker(SQS.Consumer, [])
     ]
 
     opts = [strategy: :one_for_one, name: ApplicationSupervisor]

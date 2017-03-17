@@ -16,8 +16,12 @@ defmodule Palleto.Mixfile do
   def application do
     [
       applications: [
+        :ex_aws,
         :gen_stage,
+        :hackney,
+        :httpoison,
         :logger,
+        :poison
       ],
       mod: {Palleto, []}
     ]
@@ -34,7 +38,12 @@ defmodule Palleto.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
+      {:ex_aws, "~> 1.0.0-beta0"},
       {:gen_stage, "~> 0.11.0"},
+      {:hackney, "~> 1.6"},
+      {:httpoison, "~> 0.9.0"},
+      {:poison, "~> 2.0"},
+      {:sweet_xml, "~> 0.6.1"}
     ]
   end
 end

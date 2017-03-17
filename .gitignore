@@ -18,3 +18,7 @@ erl_crash.dump
 
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
+
+# Files with secret keys for development
+docker/development/secret/*
+!docker/development/secret/*.env.example

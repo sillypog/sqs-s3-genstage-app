@@ -1,0 +1,71 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Create S3 buckets and SQS queues for data pipeline",
+  "Parameters": {
+    "Environment": {
+      "Description": "The environment name, eg production",
+      "Type": "String",
+      "Default": "development"
+    }
+  },
+  "Resources": {
+    "PipelineQueuePolicy": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "DependsOn": ["PipelineRawDataQueue"],
+      "Properties": {
+        "PolicyDocument": {
+          "Id": "PipelineQueuePolicyDocument",
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "Allow-Everyone-SendMessage",
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": ["SQS:SendMessage"],
+              "Resource": "*"
+            }
+          ]
+        },
+        "Queues": [
+          {"Ref": "PipelineRawDataQueue"}
+        ]
+      }
+    },
+    "PipelineRawDataQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": {"Fn::Join": ["_",["warehouse", "raw_events"]]},
+        "MessageRetentionPeriod": 600
+      }
+    },
+    "PipelineS3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "DependsOn": "PipelineQueuePolicy",
+      "Properties": {
+        "BucketName": {"Fn::Join": [".",["warehouse", {"Ref": "Environment"}]]},
+        "NotificationConfiguration": {
+          "QueueConfigurations": [
+            {
+              "Event": "s3:ObjectCreated:*",
+              "Queue": {"Fn::GetAtt" : ["PipelineRawDataQueue", "Arn"]},
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "packrat/data/"
+                    },
+                    {
+                      "Name": "suffix",
+                      "Value": ".gz"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

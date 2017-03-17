@@ -120,3 +120,12 @@ Consumed by #PID<0.157.0>: hey, hey
 Server #PID<0.166.0> looping: Run 6. Looking for 12 events
 ...
 ```
+
+## sqs-step-6-process-messages
+This is the first step that downloads data from S3. The server is using ExAws to poll the SQS queue, SweetXML to parse the SQS messages, and Poison to parse the JSON encoded S3 events within those messages. You will need to run `mix do deps.get, deps.compile` to use these.
+
+At this point, uploading files to an S3 bucket configured to send events to the SQS queue being watched, results in the consumer displaying the location of those files in S3. However, the original messages are not being deleted from the SQS queue, so the same messages will be continually reprocessed.
+
+ExAws attempts to read your AWS credentials from the environment. To make this easier to manage, I've included a docker-compose.yml. To use this, copy docker/development/secret/aws.env.example to docker/development/secret/aws.env and fill in the values. Then run the continer with `docker-compose run app /bin/bash`.
+
+I have also included a cloudformation template describing the setup of the S3 bucket events and the SQS queue that receives them.

@@ -1,0 +1,6 @@
+app:
+  build: .
+  volumes:
+    - .:/app
+  env_file:
+    - docker/development/secret/aws.env
