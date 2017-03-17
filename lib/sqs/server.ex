@@ -1,4 +1,31 @@
 defmodule SQS.Server do
+  @moduledoc """
+  The server is responsible for managing interactions with SQS,
+  and for controlling the lifecycle of SQS messages.
+
+  The producer calls pull/1 to request messages in response to
+  demand. This starts a supervised task that makes a call to
+  SQS to request messages. pull/1 limits the number of events
+  requested to a maximum of 10, as this limit is imposed by SQS.
+  When messages are found they are sent back to the producer.
+  If this doesn't satisfy the original request, the loop waits
+  5 seconds and makes another request. When enough messages are
+  found, the task exits. If the producer makes further requests
+  for demand while a task is running, the existing task is killed
+  and a new task will be started with a request for the new level
+  of demand.
+
+  When messages are received they are processed to extract the
+  S3 bucket and object key information. These are packaged in a
+  map and sent to the stages.
+
+  In addition, the map also contains the message id and request
+  handle received from SQS. When the events have been completely
+  processed by all stages, the final stage should call release/1
+  with the events it received. release/1 will call SQS with the
+  message id and request handle to delete the message from the
+  queue.
+  """
   use Supervisor
 
   import SweetXml

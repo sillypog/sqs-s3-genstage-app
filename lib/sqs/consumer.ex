@@ -1,5 +1,9 @@
 defmodule SQS.Consumer do
   @moduledoc """
+  This stage receives the contents of a text file.
+  It counts the number of non-empty lines in the file
+  and writes that count to disk.
+
   The consumer receives the pipeline name from the
   supervisor and uses this to infer the name of the
   upstream stage it should subscribe to.

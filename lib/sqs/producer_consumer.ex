@@ -1,5 +1,9 @@
 defmodule SQS.ProducerConsumer do
   @moduledoc """
+  This stage receives an event containing the location
+  of a file on S3. It downloads and unzips this file
+  before handing it off to the consumer stage.
+
   Multiple producer/consumers will be running in parallel,
   so each process receives the pipeline name from the
   supervisor and uses it to create a unique name that is

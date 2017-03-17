@@ -1,4 +1,22 @@
 defmodule SQS.Producer do
+  @moduledoc """
+  The producer state receives demand from the producer/consumers,
+  asking for messages to be read from SQS. In order to not block
+  at this step, delaying other stages from sending further demand,
+  the producer requests the events from a separate server process.
+  The server immediately responds to the producer with no message,
+  and begins pollign SQS asynchronously. Once the server receives
+  messages from SQS, these events are sent back to the producer via
+  the enqueue/1 function, which is also asynchronous, allowing the
+  server to keep working. The enqueued event is handled in handle_cast/2,
+  which passes the event to the next stage for processing.
+
+  The producer stores demand from the subscribing stages and
+  adds this to any previously unmet demand. In the final application,
+  each subscriber has a demand of 1, and this is never immediately
+  satisfied in handle_demand/2, but the logic has been left in for
+  flexibility.
+  """
   use GenStage
 
   ##########

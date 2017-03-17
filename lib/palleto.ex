@@ -1,9 +1,15 @@
 defmodule Palleto do
   @moduledoc """
-  Files are now being processed concurrently. A single producer
-  is now sending events to multiple producer/consumer-consumer
-  stages. The producer/consumer-consumer stages are managed as
-  single units within a supervision tree.
+  An example GenStage data processing pipeline, reading messages
+  from SQS triggered by modifications to an S3 bucket. Each SQS
+  message contains the location of a newly created or modified
+  S3 object.
+
+  A single producer stage controls a server that retrieves SQS
+  messages as demand comes in from consumers, and sends those
+  events to multiple producer/consumer-consumer stages. The
+  producer/consumer-consumer stages are managed as single units
+  within a supervision tree.
 
   This design allows us to scale up the number of file processing
   units while keeping the cost of querying SQS relatively constant.
