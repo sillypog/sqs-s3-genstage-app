@@ -239,3 +239,189 @@ Server #PID<0.205.0> looping: Run 2. Looking for 1 events
 Server #PID<0.205.0> looping: Run 3. Looking for 1 events
 ...
 ```
+
+## sqs-step-9-concurrent-file-processing
+The producer/consumer and consumer are now being managed within a supervision tree, and are launched as uniquely named processes. By increasing the number of ConsumerSupervisors, we can scale the rate of file processing independently of the rate of SQS request processing.
+```
+Attempting to start SQS.Server
+Initializing SQS.Server supervision tree
+Initalised SQS.Producer
+SQS.Supervisor Pipeline1
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+SQS.Supervisor Pipeline2
+SQS.Supervisor Pipeline3
+Started new server loop with pid #PID<0.191.0>
+Server #PID<0.191.0> looping: Run 0. Looking for 1 events
+Received 0 events
+SQS.Producer handling demand of 1
+Asking for 2 events
+There are currently 1 servers looping
+Terminating server with pid #PID<0.191.0>
+All servers terminated
+Server #PID<0.200.0> looping: Run 0. Looking for 2 events
+Started new server loop with pid #PID<0.200.0>
+Received 0 events
+SQS.Producer handling demand of 1
+Asking for 3 events
+There are currently 1 servers looping
+Terminating server with pid #PID<0.200.0>
+All servers terminated
+Server #PID<0.201.0> looping: Run 0. Looking for 3 events
+Started new server loop with pid #PID<0.201.0>
+Received 0 events
+Server #PID<0.201.0> looping: Run 1. Looking for 3 events
+Server #PID<0.201.0> looping: Run 2. Looking for 3 events
+Server #PID<0.201.0> looping: Run 3. Looking for 3 events
+Server #PID<0.201.0> looping: Run 4. Looking for 3 events
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline1 ProducerConsumer received 1 events
+Pipeline1 ProducerConsumer downloaded packrat/data/20160730.gz
+SQS.Producer handling demand of 1
+Asking for 3 events
+There are currently 1 servers looping
+Terminating server with pid #PID<0.201.0>
+All servers terminated
+Server #PID<0.208.0> looping: Run 0. Looking for 3 events
+Started new server loop with pid #PID<0.208.0>
+Received 0 events
+Pipeline1 Consumer processed packrat/data/20160730.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline2 ProducerConsumer received 1 events
+Pipeline2 ProducerConsumer downloaded packrat/data/20160728.gz
+SQS.Producer handling demand of 1
+Asking for 3 events
+There are currently 1 servers looping
+Terminating server with pid #PID<0.208.0>
+All servers terminated
+Server #PID<0.210.0> looping: Run 0. Looking for 3 events
+Started new server loop with pid #PID<0.210.0>
+Received 0 events
+Pipeline2 Consumer processed packrat/data/20160728.gz
+Casting events to producer
+SQS.Producer got notified about 3 new events
+Pipeline3 ProducerConsumer received 1 events
+Pipeline3 ProducerConsumer downloaded packrat/data/20160723.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.212.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.212.0>
+Received 0 events
+Pipeline3 Consumer processed packrat/data/20160723.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline2 ProducerConsumer received 1 events
+Pipeline1 ProducerConsumer received 1 events
+Pipeline2 ProducerConsumer downloaded packrat/data/20160729.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.217.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.217.0>
+Received 0 events
+Pipeline2 Consumer processed packrat/data/20160729.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline2 ProducerConsumer received 1 events
+Pipeline2 ProducerConsumer downloaded packrat/data/20160731.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.218.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.218.0>
+Received 0 events
+Pipeline2 Consumer processed packrat/data/20160731.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline2 ProducerConsumer received 1 events
+Pipeline2 ProducerConsumer downloaded packrat/data/20160721.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.221.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.221.0>
+Received 0 events
+Pipeline2 Consumer processed packrat/data/20160721.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline2 ProducerConsumer received 1 events
+Pipeline2 ProducerConsumer downloaded packrat/data/20160725.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.223.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.223.0>
+Received 0 events
+Pipeline2 Consumer processed packrat/data/20160725.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline2 ProducerConsumer received 1 events
+Pipeline2 ProducerConsumer downloaded packrat/data/20160727.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.226.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.226.0>
+Received 0 events
+Pipeline2 Consumer processed packrat/data/20160727.gz
+Pipeline3 ProducerConsumer received 1 events
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline2 ProducerConsumer received 1 events
+Pipeline3 ProducerConsumer downloaded packrat/data/20160720.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.227.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.227.0>
+Received 0 events
+Pipeline3 Consumer processed packrat/data/20160720.gz
+Casting events to producer
+SQS.Producer got notified about 1 new events
+Pipeline3 ProducerConsumer received 1 events
+Pipeline3 ProducerConsumer downloaded packrat/data/20160724.gz
+SQS.Producer handling demand of 1
+Asking for 1 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.229.0> looping: Run 0. Looking for 1 events
+Started new server loop with pid #PID<0.229.0>
+Received 0 events
+Pipeline3 Consumer processed packrat/data/20160724.gz
+Pipeline1 ProducerConsumer downloaded packrat/data/20160726.gz
+SQS.Producer handling demand of 1
+Asking for 2 events
+There are currently 1 servers looping
+Terminating server with pid #PID<0.229.0>
+All servers terminated
+Server #PID<0.232.0> looping: Run 0. Looking for 2 events
+Started new server loop with pid #PID<0.232.0>
+Received 0 events
+Pipeline1 Consumer processed packrat/data/20160726.gz
+Pipeline2 ProducerConsumer downloaded packrat/data/20160722.gz
+SQS.Producer handling demand of 1
+Asking for 3 events
+There are currently 1 servers looping
+Terminating server with pid #PID<0.232.0>
+All servers terminated
+Server #PID<0.235.0> looping: Run 0. Looking for 3 events
+Started new server loop with pid #PID<0.235.0>
+Received 0 events
+Pipeline2 Consumer processed packrat/data/20160722.gz
+Server #PID<0.235.0> looping: Run 1. Looking for 3 events
+Server #PID<0.235.0> looping: Run 2. Looking for 3 events
+Server #PID<0.235.0> looping: Run 3. Looking for 3 events
+...
+```

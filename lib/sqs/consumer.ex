@@ -1,14 +1,11 @@
 defmodule SQS.Consumer do
   @moduledoc """
-  The consumer is now subscribing to the producer/consumer,
-  with a demand of 1 because we only want to process one
-  file at a time. The consumer now receives the contents
-  of the S3 file and counts the number of lines in the file,
-  writing the count to the output/ folder.
+  The consumer receives the pipeline name from the
+  supervisor and uses this to infer the name of the
+  upstream stage it should subscribe to.
 
-  The artificial delay in the consumer has been removed,
-  as latency is introduced to the pipeline by the file
-  download in the producer/consumer.
+  It also sets the pipeline name as its state in
+  order to include it in the logging information.
   """
 
   use GenStage
@@ -16,8 +13,8 @@ defmodule SQS.Consumer do
   ##########
   # Client API
   ##########
-  def start_link do
-    GenStage.start_link(__MODULE__, :ok)
+  def start_link(pipeline_name) do
+    GenStage.start_link(__MODULE__, pipeline_name)
   end
 
 
@@ -25,20 +22,21 @@ defmodule SQS.Consumer do
   # Server callbacks
   ##########
 
-  def init(:ok) do
-    {:consumer, :ok, subscribe_to: [{SQS.ProducerConsumer, min_demand: 0, max_demand: 1}]}
+  def init(pipeline_name) do
+    upstream = Enum.join([pipeline_name, "ProducerConsumer"], "")
+    {:consumer, pipeline_name, subscribe_to: [{String.to_atom(upstream), min_demand: 0, max_demand: 1}]}
   end
 
-  def handle_events([%{key: key, file: file}] = events, _from, state) do
+  def handle_events([%{key: key, file: file}] = events, _from, pipeline_name) do
     file
     |> process_file
     |> write_output(String.split(key, "."))
 
-    IO.puts "Consumer processed #{key}"
+    IO.puts "#{pipeline_name} Consumer processed #{key}"
 
     SQS.Server.release(events)
 
-    {:noreply, [], state}
+    {:noreply, [], pipeline_name}
   end
 
   ########

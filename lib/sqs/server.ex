@@ -1,17 +1,4 @@
 defmodule SQS.Server do
-  @moduledoc """
-  The server is now also responsible for removing messages
-  from the SQS queue.
-
-  When a message is received, in addition to including the
-  S3 bucket and key in the event sent to the consumer, the
-  server also includes the message id and receipt handle
-  it receives for that message from SQS. This passes
-  unchanged through the stages. When the message has been
-  consumed, SQS.Server.release/1 is called with the original
-  event as the parameter. The message id and receipt handle
-  are extracted and used to call SQS to remove the messages.
-  """
   use Supervisor
 
   import SweetXml
@@ -39,7 +26,7 @@ defmodule SQS.Server do
   end
 
   def release([]) do
-    :ok # Don't think it will get called like this
+    :ok
   end
   def release(messages) do
     receipts = Enum.map(messages, fn(message)->
@@ -48,8 +35,6 @@ defmodule SQS.Server do
         id: Map.get(message, :id)
       }
     end)
-    # Because consumer demand is greater than one, there may be
-    # multiple messages being deleted at one time.
     ExAws.SQS.delete_message_batch("warehouse_raw_events", receipts)
     |> ExAws.request
   end
