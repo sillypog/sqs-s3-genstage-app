@@ -129,3 +129,56 @@ At this point, uploading files to an S3 bucket configured to send events to the 
 ExAws attempts to read your AWS credentials from the environment. To make this easier to manage, I've included a docker-compose.yml. To use this, copy docker/development/secret/aws.env.example to docker/development/secret/aws.env and fill in the values. Then run the continer with `docker-compose run app /bin/bash`.
 
 I have also included a cloudformation template describing the setup of the S3 bucket events and the SQS queue that receives them.
+
+## sqs-step-7-release-messages
+Messages are now being released from the queue once they are processed. Retrieving, processing, and deleting messages from SQS is now working as planned.
+
+```
+Attempting to start SQS.Server
+Initializing SQS.Server supervision tree
+Initalised SQS.Producer
+SQS.Producer handling demand of 10
+Asking for 10 events
+There are currently 0 servers looping
+All servers terminated
+Interactive Elixir (1.4.2) - press Ctrl+C to exit (type h() ENTER for help)
+Started new server loop with pid #PID<0.192.0>
+Server #PID<0.192.0> looping: Run 0. Looking for 10 events
+Received 0 events
+iex(1)> Server #PID<0.192.0> looping: Run 1. Looking for 10 events
+Server #PID<0.192.0> looping: Run 2. Looking for 10 events
+Server #PID<0.192.0> looping: Run 3. Looking for 10 events
+Server #PID<0.192.0> looping: Run 4. Looking for 10 events
+Casting events to producer
+SQS.Producer got notified about 3 new events
+Consumed by #PID<0.191.0>: warehouse.development/packrat/data/20160722.gz, warehouse.development/packrat/data/20160724.gz, warehouse.development/packrat/data/20160727.gz
+Server #PID<0.192.0> looping: Run 5. Looking for 7 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed by #PID<0.191.0>: warehouse.development/packrat/data/20160723.gz, warehouse.development/packrat/data/20160726.gz
+Server #PID<0.192.0> looping: Run 6. Looking for 5 events
+Casting events to producer
+SQS.Producer got notified about 3 new events
+Consumed by #PID<0.191.0>: warehouse.development/packrat/data/20160720.gz, warehouse.development/packrat/data/20160721.gz, warehouse.development/packrat/data/20160725.gz
+Server #PID<0.192.0> looping: Run 7. Looking for 2 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed by #PID<0.191.0>: warehouse.development/packrat/data/20160728.gz, warehouse.development/packrat/data/20160729.gz
+SQS.Producer handling demand of 10
+Asking for 10 events
+There are currently 0 servers looping
+All servers terminated
+Server #PID<0.197.0> looping: Run 0. Looking for 10 events
+Started new server loop with pid #PID<0.197.0>
+Received 0 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed by #PID<0.191.0>: warehouse.development/packrat/data/20160730.gz, warehouse.development/packrat/data/20160731.gz
+Server #PID<0.197.0> looping: Run 1. Looking for 8 events
+Server #PID<0.197.0> looping: Run 2. Looking for 8 events
+Server #PID<0.197.0> looping: Run 3. Looking for 8 events
+Server #PID<0.197.0> looping: Run 4. Looking for 8 events
+Server #PID<0.197.0> looping: Run 5. Looking for 8 events
+Server #PID<0.197.0> looping: Run 6. Looking for 8 events
+...
+```

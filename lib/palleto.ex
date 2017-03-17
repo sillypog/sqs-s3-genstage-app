@@ -1,19 +1,15 @@
 defmodule Palleto do
   @moduledoc """
-  This is the first step that downloads data from SQS.
-  There are significant changes to the server to retrieve and
-  parse messages from the queue.
+  Messages are now being deleted once they are processed.
+  At this point, the SQS aspects of the pipeline are
+  working as planned.
 
-  Although the server has changed significantly, the interaction
-  with the producer is unchanged and the producer has not been
-  modified at all.
-
-  The consumer has been modified to display the new message
-  format.
-
-  There is a major issue with the code at this point - although
-  messages are consumed, they are never removed from the queue.
-  Messages will be consumed more than once.
+  This was done by adding a release function to the server,
+  which extracts the newly added message_id and receipt_handle
+  fileds from each event sent through the stages. In this
+  way, the consumer doesn't need to know anything about the
+  implementation of message deleting, it just informs the server
+  when a message should be deleted.
   """
 
   use Application

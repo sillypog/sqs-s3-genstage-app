@@ -1,18 +1,14 @@
 defmodule SQS.Consumer do
   @moduledoc """
-  The consumer is now recieving events containing the location
-  of a file on s3, and the code to display these more complex
-  messages has been moved to a separate function.
+  The consumer is now informing the server that messages have
+  been processed. The consumer doesn't need to know how this
+  works, it just passes the original message back to the server.
+  The message contains all the information necessary to remove
+  the SQS message from the queue.
 
-  Having consumed the event, the original SQS should be removed
-  from the queue. For this to happen, the consumer would need
-  the message id and a receipt handle in order to instruct
-  SQS to delete the message from the queue. Without this, the
-  visibility window will timeout and the message will be available
-  to be read again.
-
-  At this point, the consumer doesn't have access to that
-  information.
+  The display_events function has changed because the event is
+  now a map in order to contain the extra information needed
+  to delete the SQS message.
   """
 
   use GenStage
@@ -36,12 +32,10 @@ defmodule SQS.Consumer do
   def handle_events(events, _from, state) do
     :timer.sleep(1000)
 
-    # event_string = Enum.join(events, ", ")
-    # IO.puts "Consumed by #{inspect(self)}: #{event_string}"
     display_events(events)
 
-    # Should remove the event from the queue
-    # but we don't have the message id
+    # Remove the event from the queue
+    SQS.Server.release(events)
 
     {:noreply, [], state}
   end
@@ -51,7 +45,7 @@ defmodule SQS.Consumer do
   ########
   defp display_events(events) do
     event_string = events
-    |> Enum.map(fn({bucket, key}) -> "#{bucket}/#{key}" end)
+    |> Enum.map(fn(%{bucket: bucket, key: key}) -> "#{bucket}/#{key}" end)
     |> Enum.join(", ")
     IO.puts "Consumed by #{inspect(self())}: #{event_string}"
   end

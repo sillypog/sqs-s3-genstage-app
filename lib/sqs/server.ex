@@ -1,17 +1,16 @@
 defmodule SQS.Server do
   @moduledoc """
-  The server is now pulling real events from SQS instead of simulating them.
-  ExAws is used to make requests to SQS. SweetXML is used to extract the
-  message body, which is an event from S3. Those events are json encoded,
-  so Poison is used to extract the bucket and object information from the
-  S3 event.
+  The server is now also responsible for removing messages
+  from the SQS queue.
 
-  The nature of the loop, and the interactions with the producer have not
-  changed much. One important difference is that the demand from the producer
-  is being limited, as the SQS API only allows us to retrieve up to 10
-  messages at a time. If the producer requests more than this, a loop will
-  be started to retrieve 10 messages. The producer doesn't need to know
-  about this limitation because it keeps track of all demand independently.
+  When a message is received, in addition to including the
+  S3 bucket and key in the event sent to the consumer, the
+  server also includes the message id and receipt handle
+  it receives for that message from SQS. This passes
+  unchanged through the stages. When the message has been
+  consumed, SQS.Server.release/1 is called with the original
+  event as the parameter. The message id and receipt handle
+  are extracted and used to call SQS to remove the messages.
   """
   use Supervisor
 
@@ -26,7 +25,6 @@ defmodule SQS.Server do
   end
 
   def pull(count) do
-    # Limit the count as SQS can only support a maximum of 10 events
     limited_count = min(10, count)
 
     # Cancel any running loops
@@ -38,6 +36,22 @@ defmodule SQS.Server do
     {:ok, pid} = Task.Supervisor.start_child(SQS.Server.TaskSupervisor, fn -> loop(limited_count, 0) end)
     IO.puts "Started new server loop with pid #{inspect(pid)}"
     {0, []}
+  end
+
+  def release([]) do
+    :ok # Don't think it will get called like this
+  end
+  def release(messages) do
+    receipts = Enum.map(messages, fn(message)->
+      %{
+        receipt_handle: Map.get(message, :receipt_handle),
+        id: Map.get(message, :id)
+      }
+    end)
+    # Because consumer demand is greater than one, there may be
+    # multiple messages being deleted at one time.
+    ExAws.SQS.delete_message_batch("warehouse_raw_events", receipts)
+    |> ExAws.request
   end
 
   ##########
@@ -63,9 +77,8 @@ defmodule SQS.Server do
     |> ExAws.request
 
     events = Map.get(response, :body)
-    |> xpath(~x"//Body/text()"s)
-    |> Poison.Parser.parse
-    |> get_paths
+    |> xpath(~x"//ReceiveMessageResult/Message"l, body: ~x"./Body/text()"s, receipt_handle: ~x"./ReceiptHandle/text()"s, id: ~x"./MessageId/text()"s)
+    |> process_messages
 
     if length(events) > 0 do
       SQS.Producer.enqueue({length(events), events})
@@ -79,21 +92,38 @@ defmodule SQS.Server do
     end
   end
 
-  defp get_paths({:error, _}) do
+  defp process_messages([]) do
     []
   end
-  defp get_paths({:ok, json}) do
-    Map.get(json, "Records")
-    |> Enum.map(fn(record) ->
-      s3 = Map.get(record, "s3")
-      bucket = s3
-      |> Map.get("bucket")
-      |> Map.get("name")
-      key = s3
-      |> Map.get("object")
-      |> Map.get("key")
-      {bucket, key}
+  defp process_messages(results) do
+    Enum.map(results, fn(result) ->
+      {bucket, key} = result
+      |> Map.get(:body)
+      |> Poison.Parser.parse
+      |> get_path
+
+      %{bucket: bucket, key: key, receipt_handle: Map.get(result, :receipt_handle), id: Map.get(result, :id)}
     end)
+  end
+
+  defp get_path({:error, _}) do
+    []
+  end
+  defp get_path({:ok, json}) do
+    s3 = json
+    |> Map.get("Records")
+    |> List.first         # Assumes each SQS message contains a record for one S3 file
+    |> Map.get("s3")
+
+    bucket = s3
+    |> Map.get("bucket")
+    |> Map.get("name")
+
+    key = s3
+    |> Map.get("object")
+    |> Map.get("key")
+
+    {bucket, key}
   end
 
   defp terminate_servers([]) do
