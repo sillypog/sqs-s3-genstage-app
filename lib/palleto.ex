@@ -1,8 +1,8 @@
 defmodule Palleto do
   @moduledoc """
-  This has the same functionality as the previous step,
-  but now the producer provides an API to make it explicit
-  that the server should inform it when events are found.
+  This is a more accurate simulation of working with SQS.
+  Messages are not available immediately and demand is not
+  satisfied when the first batch of events is found.
   """
 
   use Application

@@ -43,6 +43,9 @@ The server is still returning generated strings, but it now does this within a l
 
 ## sqs-step-3-send-via-client-api
 This is very similar to the previous step, except the producer provides an `enqueue/1` function to make the data flow from the server more explicit than using `Kernal.send/2`.
+
+## sqs-step-4-simulate-waiting
+This is a more accurate simulation of working with SQS. The server artificially delays the return of events, as though these had not arrived in the queue yet. When it does return events, it doesn't return enough to satisfy demand in one batch. The same server loop will keep running until the requested demand is satisfied. Once those have all been consumed, another set of 10 messages will be demanded and a new server loop will start.
 ```
 Attempting to start SQS.Server
 Initializing SQS.Server supervision tree
@@ -50,28 +53,42 @@ Initalised SQS.Producer
 SQS.Producer handling demand of 10
 Asking for 10 events
 There are currently 0 servers looping
+All servers terminated
 Server looping: Run 0. Looking for 10 events
-Casting events to producer
 Started new server loop with pid #PID<0.158.0>
 Received 0 events
-SQS.Producer got notified about 10 new events
-Consumed: hey, hey, hey, hey, hey, hey, hey, hey, hey, hey
+Server looping: Run 1. Looking for 10 events
+Server looping: Run 2. Looking for 10 events
+Server looping: Run 3. Looking for 10 events
+Server looping: Run 4. Looking for 10 events
+Server looping: Run 5. Looking for 10 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed: hey, hey
+Server looping: Run 6. Looking for 8 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed: hey, hey
+Server looping: Run 7. Looking for 6 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed: hey, hey
+Server looping: Run 8. Looking for 4 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed: hey, hey
+Server looping: Run 9. Looking for 2 events
+Casting events to producer
+SQS.Producer got notified about 2 new events
+Consumed: hey, hey
 SQS.Producer handling demand of 10
 Asking for 10 events
 There are currently 0 servers looping
+All servers terminated
 Server looping: Run 0. Looking for 10 events
 Started new server loop with pid #PID<0.162.0>
-Casting events to producer
 Received 0 events
-SQS.Producer got notified about 10 new events
-Consumed: hey, hey, hey, hey, hey, hey, hey, hey, hey, hey
-SQS.Producer handling demand of 10
-Asking for 10 events
-There are currently 0 servers looping
-Server looping: Run 0. Looking for 10 events
-Started new server loop with pid #PID<0.163.0>
-Casting events to producer
-Received 0 events
-SQS.Producer got notified about 10 new events
-Consumed: hey, hey, hey, hey, hey, hey, hey, hey, hey, hey
+Server looping: Run 1. Looking for 10 events
+Server looping: Run 2. Looking for 10 events
+...
 ```

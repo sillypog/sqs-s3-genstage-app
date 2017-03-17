@@ -1,7 +1,15 @@
 defmodule SQS.Server do
   @moduledoc """
-  When new events are found in the loop, the server sends these
-  to the producer using the producer's client API.
+  The server doesn't return any messages the first 5 times it runs,
+  then it begins returning a small number of a messages at a time.
+
+  This is designed to simulate real interactions with SQS, where
+  messages may not be available immediately and where messages
+  are not all retrieved in a single call.
+
+  There should only be one server loop running at a time. To be
+  extra cautious, a list of supervised loops is retrieved when
+  new demand is received and all of these are killed.
   """
   use Supervisor
 
@@ -17,10 +25,10 @@ defmodule SQS.Server do
     # Cancel any running loops
     children = Task.Supervisor.children(SQS.Server.TaskSupervisor)
     IO.puts "There are currently #{length(children)} servers looping"
-    # Start a new loop
+    terminate_servers(children)
+
     {:ok, pid} = Task.Supervisor.start_child(SQS.Server.TaskSupervisor, fn -> loop(count, 0) end)
     IO.puts "Started new server loop with pid #{inspect(pid)}"
-    # Return something empty to caller
     {0, []}
   end
 
@@ -37,18 +45,40 @@ defmodule SQS.Server do
     supervise(children, opts)
   end
 
+  ##########
+  # Private functions
+  ##########
   defp loop(count, runs) do
     IO.puts "Server looping: Run #{runs}. Looking for #{count} events"
-    events = List.duplicate("hey", count)
+
+    # Simulate the scenario where we don't have enough supply immediately
+    events = if runs < 5  do
+      []
+    else
+      List.duplicate("hey", 2)
+    end
 
     if length(events) > 0 do
-      # Use the producer's API to send events
       SQS.Producer.enqueue({length(events), events})
+      # If the original demand hasn't been satisfied, keep looping
+    end
+
+    if length(events) == count do
       Process.exit(self(), :normal)
     else
-      :timer.sleep(1000)
-      loop(count, runs + 1)
+      # Wait for more messages to arrive, then check again
+      :timer.sleep(5000)
+      loop(count - length(events), runs + 1)
     end
   end
 
+  defp terminate_servers([]) do
+    IO.puts "All servers terminated"
+    :ok
+  end
+  defp terminate_servers([h|t]) do
+    IO.puts "Terminating server with pid #{inspect(h)}"
+    Process.exit(h, :kill)
+    terminate_servers(t)
+  end
 end
